@@ -29,14 +29,15 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         //this is I've done just for assignment purpose as of here. So that my passwor will be just "password"
         return NoOpPasswordEncoder.getInstance();
     }
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
+/*        This code work without aurhotization*/
+           httpSecurity
                 .csrf()
                 .disable()
                 .authorizeRequests()
@@ -47,6 +48,22 @@ public class SecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+/*        httpSecurity
+                .csrf()
+                .disable()
+                .authorizeRequests()
+                .antMatchers("/authenticate")
+                .permitAll()
+                .and()
+                .authorizeRequests()
+                .antMatchers("/**").hasAuthority("BRANCH_MANAGER")
+                .anyRequest()
+                .authenticated()
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);*/
+
 
         httpSecurity.addFilterBefore(customerJwtFilter, UsernamePasswordAuthenticationFilter.class);
 

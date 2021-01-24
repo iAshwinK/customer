@@ -10,6 +10,8 @@ import com.omnirio.customer.vo.UserResponse;
 import com.omnirio.customer.vo.UserType;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -24,6 +26,7 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @PreAuthorize("hasAuthority('BRANCH_MANAGER')")
     public String createUser(UserRequest userRequest) {
 
         //TODO: add some user validation code & throw exceptions
@@ -35,6 +38,9 @@ public class UserService {
         return result.getUserId();
     }
 
+//    @PreAuthorize("hasAuthority('BRANCH_MANAGER') or hasAuthority('CUSTOMER')")
+
+    @PostAuthorize("(hasAuthority('BRANCH_MANAGER')) OR (returnObject.userName == authentication.principal.username AND hasAuthority('CUSTOMER'))")
     public UserResponse getUser(String userId) {
 
         UserEntity result = userRepository.getOne(userId);
@@ -42,6 +48,7 @@ public class UserService {
         return mapTo(result);
     }
 
+    @PreAuthorize("hasAuthority('BRANCH_MANAGER')")
     public List<UserResponse> getUsers() {
         List<UserEntity> userEntities = userRepository.findAll();
 
@@ -49,6 +56,7 @@ public class UserService {
         return result;
     }
 
+    @PostAuthorize("(hasAuthority('BRANCH_MANAGER')) OR (returnObject.userName == authentication.principal.username AND hasAuthority('CUSTOMER'))")
     public UserResponse updateUser(UserRequest userRequest, String userId) {
         //first find the Customer/User details by given userId
         UserEntity existingEntity = userRepository.getOne(userId);
@@ -64,18 +72,14 @@ public class UserService {
         return mapTo(result);
     }
 
+    @PreAuthorize("hasAuthority('BRANCH_MANAGER')")
     public void deleteUser(String userId) {
         userRepository.deleteById(userId);
     }
     
-    public boolean isUserExist(String userName){
+    public UserEntity getAuthUser(String userName){
         UserEntity userEntity = userRepository.findByUserName(userName).orElse(null);
-        if(userEntity==null){
-            return false;
-        }
-        else{
-            return true;
-        }
+        return userEntity;
     }
     
     //supporting methods which will be part of only this class
