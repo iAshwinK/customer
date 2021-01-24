@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,7 +67,18 @@ public class UserService {
     public void deleteUser(String userId) {
         userRepository.deleteById(userId);
     }
-
+    
+    public boolean isUserExist(String userName){
+        UserEntity userEntity = userRepository.findByUserName(userName).orElse(null);
+        if(userEntity==null){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+    
+    //supporting methods which will be part of only this class
     private UserEntity mapTo(UserRequest userRequest, String userId) {
 
         UserEntity userEntity = new UserEntity();
